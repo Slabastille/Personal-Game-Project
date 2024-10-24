@@ -3,11 +3,12 @@ import java.awt.Graphics;
 import java.awt.*;
 import java.awt.Toolkit;
 
-import engine.Rect;
+import engine.*;
 
 public class Game extends GamePanel
 {
-    Image Scene1 = Toolkit.getDefaultToolkit().getImage("src/assets/images/sceneOne/sceneOne.png");
+    //Image Scene1 = Toolkit.getDefaultToolkit().getImage("src/assets/images/sceneOne/sceneOne.png");
+    Image Scene1 = Toolkit.getDefaultToolkit().getImage("src/assets/images/mainCharacter/mc_ar_0.png");
 	Rect r1 = new Rect(200, 200, 50, 30);
 	Rect r2 = new Rect(300, 20, 75, 30);
 	Rect[] Walls = {
@@ -16,35 +17,30 @@ public class Game extends GamePanel
             new Rect (700, 200, 1500, 30),//right wall
             new Rect (10, 550, 700, 30),  //bottom wall
         };
+
+    Animation mainCharacter = new Animation("mc_ar", 4);
     @Override
     protected void paintComponent(Graphics g) {
+
+
         super.paintComponent(g);
+
+        g.drawImage(mainCharacter.nextImage(),100,100,null);
        
         g.drawImage(Scene1, 0, 0, null);
-        g.setColor(Color.WHITE);
+        //g.setColor(Color.WHITE);
         r1.draw(g);
         r2.draw(g);
         for(Rect wall : Walls){
             wall.draw(g);
         }
+
         
     }
 
     public void run(){
         super.run();
     }
-
-
-	// public void paint(Graphics pen)
-	// {
-    //     r1.draw(pen);
-    //     r2.draw(pen);
-	
-	// }
-	
-	
-
-
 
     @Override
     public void updateGame() {
