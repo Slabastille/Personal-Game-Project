@@ -2,7 +2,11 @@ package game;
 import java.awt.Graphics;
 import java.awt.*;
 import java.awt.Toolkit;
-
+import engine.*;
+import engine.Character;
+import entities.*;
+import entities.zombies.*;
+import entities.hooligans.*;
 import engine.*;
 
 public class Game extends GamePanel
@@ -18,15 +22,29 @@ public class Game extends GamePanel
             new Rect (10, 550, 700, 30),  //bottom wall
         };
 
-    Animation mainCharacter = new Animation("mc_ar", 4);
+    //Animation mainCharacter = new Animation("mc_ar", 4);
+
+    mainCharacter Zack = new mainCharacter(300, 100, 50, 50);
+    crazyZombie joe = new crazyZombie(600, 100, 50, 50);
+    zombieFemale jane = new zombieFemale(400, 100, 50, 50);
+    zombieNormal chris = new zombieNormal(400, 150, 50, 50);
+    hooliganBat Tony = new hooliganBat(400, 150, 50, 50);
+    hooliganRifle Tommy = new hooliganRifle(480, 150, 50, 50);
+    hooliganShotgun Remy = new hooliganShotgun(200, 150, 50, 50);
     @Override
     protected void paintComponent(Graphics g) {
 
 
         super.paintComponent(g);
 
-        g.drawImage(mainCharacter.nextImage(),100,100,null);
-       
+        //g.drawImage(mainCharacter.nextImage(),100,100,null);
+        Zack.draw(g);
+        joe.draw(g);
+        jane.draw(g);
+        chris.draw(g);
+        Tony.draw(g);
+        Tommy.draw(g);
+        Remy.draw(g);
         g.drawImage(Scene1, 0, 0, null);
         //g.setColor(Color.WHITE);
         r1.draw(g);
@@ -48,31 +66,37 @@ public class Game extends GamePanel
         
         if (LT_PRESSED) {
             System.out.println("LT_PRESSED");
-            r1.moveLT(5);
+            Zack.moveLT(5);
         }
         if (RT_PRESSED) {
             System.out.println("RT_PRESSED");
-            r1.moveRT(5);
+            Zack.moveRT(5);
         }
         if (UP_PRESSED) {
             System.out.println("UP_PRESSED");
-            r1.moveUP(5);
+            Zack.moveUP(5);
         }
         if (DN_PRESSED) {
             System.out.println("DN_PRESSED");
-            r1.moveDN(5);
+            Zack.moveDN(5);
         }
         
         for (Rect wall : Walls) {
-            if(r1.overlaps(wall)){
-                r1.pushOutOf(wall);
+            if(Zack.overlaps(wall)){
+                Zack.pushOutOf(wall);
             }
             if(r2.overlaps(wall)){
                 r2.pushOutOf(wall);
             }
         }
 
-        r2.chase(r1);
+        r2.chase(Zack);
+        joe.chase(Zack);
+        jane.chase(Zack);
+        chris.chase(Zack);
+        Tony.chase(Zack);
+        Tommy.chase(Zack);
+        Remy.chase(Zack);
     }
 
 

@@ -9,13 +9,13 @@ public class Animation {
 
     //Image naming scheme
     //character.action.index
-    public Animation(String name ,  int count){
+    public Animation(String name ,  int count, String folderName){
 
         image = new Image[count];
 
         for(int i = 0; i < count; i++){
             //src/assets/images/mainCharacter/mc_ar_1.png
-                image[i] = Toolkit.getDefaultToolkit().getImage("src/assets/images/mainCharacter/" + name + "_" + i + ".png");
+                image[i] = Toolkit.getDefaultToolkit().getImage("src/assets/images/" + folderName + name + "_" + i + ".png");
             }
         next = -1;
     }
