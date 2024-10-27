@@ -4,8 +4,8 @@ import java.awt.Graphics;
 
 public class Rect
 {
-	int x;
-	int y;
+	public int x;
+	public int y;
 	
 	int w;
 	int h;
