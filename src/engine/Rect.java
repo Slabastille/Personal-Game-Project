@@ -10,9 +10,24 @@ public class Rect
 	int w;
 	int h;
 	
-	int old_x;
-	int old_y;
-
+	double vx = 0;
+	double vy = 0;
+	
+	double ay = G;
+	
+	static double G = .7;
+	static double F = .6;
+	
+	boolean held = false;
+	
+	public void physicsOff()
+	{
+		vx = 0;
+		vy = 0;
+		
+		ay = 0;
+	}
+	
 	public Rect(int x, int y, int w, int h)
 	{
 		this.x = x;
@@ -21,39 +36,190 @@ public class Rect
 		this.w = w;
 		this.h = h;
 
-		this.old_x = x;
-		this.old_y = y;
 	}
-	public void moveLT(int dx){
-
-		old_x = x;
-		x -= dx;
+	
+	public void setVelocity(double vx, double vy)
+	{
+		this.vx = vx;
+		this.vy = vy;
 	}
-	public void moveRT(int dx){
-		old_x = x;
-		x += dx;
+	
+	public void grabbed()
+	{
+		held = true;
 	}
-	public void moveUP(int dy){
-		old_y = y;
-		y -= dy;
+	
+	public void dropped()
+	{
+		held = false;
 	}
-	public void moveDN(int dy){
-		old_y = y;
-		y += dy;
+	
+	public void goLT(int vx)
+	{
+		this.vx = -vx;		
 	}
-
+	
+	public void goRT(int vx)
+	{
+		
+		this.vx = +vx;		
+	}
+	
+	public void goUP(int vy)
+	{
+		this.vy = -vy;
+	}
+	
+	public void goDN(int vy)
+	{
+		this.vy = +vy;
+	}
+	
+	public void jump(int h)
+	{
+		vy = -h;		
+	}
+	
+	public void move()
+	{
+		x += vx;
+		y += vy + G/2;
+		
+		vy += G;
+	}
+	
 	public void moveBy(int dx, int dy)
 	{
-		old_x = x;
-		old_y = y;
 		x += dx;
 		y += dy;
 	}
 	
+	
 	public void resizeBy(int dw, int dh)
 	{
 		w += dw;
+		
 		h += dh;
+	}
+	
+	public void chase(Rect r, int dx)
+	{
+		if(isLeftOf(r))   goRT(dx); 
+		if(isRightOf(r))  goLT(dx); 
+		if(isAbove(r))    goDN(dx); 
+		if(isBelow(r))    goUP(dx);
+		
+		move();
+	}
+	
+	public void evade(Rect r, int dx)
+	{
+		if(isLeftOf(r))   goLT(dx); 
+		if(isRightOf(r))  goRT(dx); 
+		if(isAbove(r))    goUP(dx); 
+		if(isBelow(r))    goDN(dx); 
+		
+		move();
+	}
+	
+	public boolean isLeftOf(Rect r)
+	{
+		return x + w < r.x;
+	}
+	
+	public boolean isRightOf(Rect r)
+	{
+		return r.x + r.w < x;
+	}
+	
+	public boolean isAbove(Rect r)
+	{
+		return y + h < r.y;
+	}
+	
+	public boolean isBelow(Rect r)
+	{
+		return r.y + r.h < y;
+	}
+	
+	
+	
+	public boolean contains(int mx, int my)
+	{
+		return (mx >= x    )  &&
+			   (mx <= x + w)  &&
+			   (my >= y    )  &&
+			   (my <= y + h);
+	}
+	
+	
+	public boolean overlaps(Rect r)
+	{
+		return (x + w >= r.x      ) &&				
+			   (x     <= r.x + r.w) &&
+			   (y + h >= r.y      ) &&			   
+			   (y     <= r.y + r.h);
+	}
+	
+	public void pushedOutOf(Rect r)
+	{
+		if(cameFromAbove(r)) 	pushbackUpFrom(r);
+		if(cameFromBelow(r))    pushbackDownFrom(r);
+		if(cameFromLeftOf(r))   pushbackLeftFrom(r);		
+		if(cameFromRightOf(r))	pushbackRightFrom(r);
+		
+		vx *= F;
+		
+		if(Math.abs(vx) <= 1)  vx = 0;
+	}
+	
+	
+	public void bounceOff(Rect r)
+	{
+		if(cameFromAbove(r)  || cameFromBelow(r))    vy = -vy;
+		if(cameFromLeftOf(r) || cameFromRightOf(r))  vx = -vx;
+	}
+	
+	public boolean cameFromLeftOf(Rect r)
+	{
+		return x - vx + w < r.x;
+	}
+	
+	public boolean cameFromRightOf(Rect r)
+	{
+		return r.x + r.w < x - vx;
+	}
+	
+	public boolean cameFromAbove(Rect r)
+	{
+		return y - vy + h < r.y;
+	}
+	
+	public boolean cameFromBelow(Rect r)
+	{
+		return r.y + r.h < y - vy;
+	}
+	
+	public void pushbackLeftFrom(Rect r)
+	{
+		x = r.x - w - 1;
+	}
+	
+	public void pushbackRightFrom(Rect r)
+	{
+		x = r.x + r.w + 1;
+	}
+	
+	public void pushbackUpFrom(Rect r)
+	{
+		y = r.y - h - 1;
+		
+		vy = 0;
+	}
+	
+	public void pushbackDownFrom(Rect r)
+	{
+		y = r.y + r.h + 1;
 	}
 	
 	
@@ -61,71 +227,11 @@ public class Rect
 	{
 		pen.drawRect(x, y, w, h);
 	}
-
 	
-	//Collision detection and resolution
-	public void pushOutOf(Rect r){
-		if(cameFromAbove(r)) pushbackUpFrom(r);
-		if(cameFromBelow(r)) pushbackDownFrom(r);
-		if(cameFromLeftOf(r)) pushBackLeftFrom(r);
-		if(cameFromRightOf(r)) pushBackRightFrom(r);
+	
+	public String toString()
+	{
+		return "new Rect(" + x + ", " + y + ", " + w + ", " + h + "),";
 	}
 
-
-	//Collision detection
-	public boolean overlaps (Rect r){
-		return (x + w >= r.x      ) &&
-			   (x 	  <= r.x + r.w) &&
-			   (y + h >= r.y      ) &&
-			   (y 	  <= r.y + r.h);
-	}
-
-	public boolean cameFromLeftOf(Rect r){
-		return old_x + w < r.x;
-	}
-	public boolean cameFromRightOf(Rect r){
-		return old_x > r.x + r.w;
-	}
-	public boolean cameFromAbove(Rect r){
-		return old_y + h < r.y;
-	}
-	public boolean cameFromBelow(Rect r){
-		return old_y > r.y + r.h;
-	}
-
-	//Collosion resolution
-	public void pushBackLeftFrom(Rect r){
-		x = r.x - w - 1;
-	}
-	public void pushBackRightFrom(Rect r){
-		x = r.x + r.w + 1;
-	}
-	public void pushbackUpFrom(Rect r){
-		y = r.y - h - 1;
-	}
-	public void pushbackDownFrom(Rect r){
-		y = r.y + r.h + 1;
-	}
-
-
-	//Chasing a target
-	public void chase(Rect r){
-		if(isLeftOf(r))  moveRT(1);
-		if(isRightOf(r)) moveLT(1);
-		if(isAbove(r))   moveDN(1);
-		if(isBelow(r))   moveUP(1);
-	}
-	//Checking direction for Chasing
-	public boolean isLeftOf(Rect r){
-		return x + w < r.x;
-	}
-	public boolean isRightOf(Rect r){
-		return x > r.x + r.w;
-	}
-	public boolean isAbove(Rect r){
-		return y + h < r.y;
-	}
-	public boolean isBelow(Rect r){
-		return y > r.y + r.h;
-	}
 }

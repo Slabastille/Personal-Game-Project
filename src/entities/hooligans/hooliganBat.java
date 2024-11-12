@@ -15,20 +15,23 @@ public class hooliganBat extends Character {
         //this.idle = new Animation(name + "_il", 10);
         currentAnimation = moveRT;
     }
-    public void moveLT(int dx){
-        super.moveLT(dx);
+    public void goLT(int dx){
+        super.goLT(dx);
         currentAnimation = moveLT;
     }
-    public void moveRT(int dx){
-        super.moveRT(dx);
+    public void goRT(int dx){
+        super.goRT(dx);
         currentAnimation = moveRT;
     }
-    public void moveUP(int dy){
-        super.moveUP(dy);
+    public void goUP(int dy){
+        super.goUP(dy);
     }
-    public void moveDN(int dy){
-        super.moveDN(dy);
+    public void goDN(int dy){
+        super.goDN(dy);
         //currentAnimation = idle;
+    }
+    public void update() {
+        
     }
 
     
