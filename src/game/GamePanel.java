@@ -10,6 +10,8 @@ public abstract class  GamePanel extends JPanel implements Runnable, KeyListener
     boolean DN_PRESSED = false;
     boolean LT_PRESSED = false;
     boolean RT_PRESSED = false;
+    boolean ZZ_PRESSED = false;
+    boolean SB_PRESSED = false;
 
     public GamePanel() {
         init();
@@ -62,6 +64,13 @@ public abstract class  GamePanel extends JPanel implements Runnable, KeyListener
         if (e.getKeyCode() == e.VK_RIGHT) {
             RT_PRESSED = true;
         }
+        if(e.getKeyCode() == e.VK_Z){
+            ZZ_PRESSED = true;
+            onAttackStart();
+        }
+        if(e.getKeyCode() == e.VK_SPACE){
+            SB_PRESSED = true;
+        }
         
     }
     public void keyReleased(KeyEvent e) {
@@ -76,11 +85,21 @@ public abstract class  GamePanel extends JPanel implements Runnable, KeyListener
         }
         if (e.getKeyCode() == e.VK_RIGHT) {
             RT_PRESSED = false;
+        }
+        if(e.getKeyCode() == e.VK_Z) {
+            ZZ_PRESSED = false;
+            onAttackStop();
+        }
+        if(e.getKeyCode() == e.VK_SPACE){
+            SB_PRESSED = false;
         }        
     }
     public void keyTyped(KeyEvent e) {
         // TODO Auto-generated method stub
         
     }
+
+    public abstract void onAttackStart();
+    public abstract void onAttackStop();
 }
 

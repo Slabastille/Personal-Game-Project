@@ -15,7 +15,14 @@ public class Animation {
 
         for(int i = 0; i < count; i++){
             //src/assets/images/mainCharacter/mc_ar_1.png
+            try{
                 image[i] = Toolkit.getDefaultToolkit().getImage("src/assets/images/" + folderName + name + "_" + i + ".png");
+                if(image[i] == null){
+                    throw new Exception("Image is null");
+                }
+            }catch(Exception e){
+                System.out.println("Error loading image: " + "src/assets/images/" + folderName + name + "_" + i + ".png");
+            }
             }
         next = -1;
     }
@@ -26,8 +33,8 @@ public class Animation {
         if(next >= image.length){
             next = 0;
         }
-        System.out.println("Next Image");
-        System.out.println(next);
+        //System.out.println("Next Image");
+        //System.out.println(next);
         return image[next];
     }
 }
