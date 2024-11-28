@@ -1,6 +1,7 @@
 package entities;
 import java.awt.*;
-import engine.Animation;
+
+import engine.*;
 
 
 import engine.Character;
@@ -9,8 +10,9 @@ public class mainCharacter extends Character {
 
     private String name = "mc";
     private String folderName = "mainCharacter/";
-    public Animation attackLT;
-    public Animation attackRT;
+    private int jumpCount = 0;
+    private int maxJumps = 2;
+
     
     
 
@@ -29,47 +31,48 @@ public class mainCharacter extends Character {
     }
      public void goLT(int dx){
         if(!isAttacking){
-         isFacingRight = false;
-         super.goLT(dx);
-        currentAnimation = moveLT;
+            isFacingRight = false;
+            super.goLT(dx);
+            currentAnimation = moveLT;
         }
     }
     public void goRT(int dx){
         if(!isAttacking){
-        isFacingRight = true;
-        super.goRT(dx);
-        currentAnimation = moveRT;
+            isFacingRight = true;
+            super.goRT(dx);
+            currentAnimation = moveRT;
         }
     }
-    public void goUP(int dy){
-        if(!isAttacking){
-        super.goUP(dy);
-        currentAnimation = whichIdle(isFacingRight);
-        }
-    }
+
     public void goDN(int dy){
         if(!isAttacking){
-        super.goDN(dy);
-        currentAnimation = whichIdle(isFacingRight);
+            super.goDN(dy);
+            currentAnimation = whichIdle(isFacingRight);
         }
     }
 
     public void jump(int h){
-        if(!isAttacking){
-        super.jump(h);
-        currentAnimation = whichIdle(isFacingRight);
+        if(!isAttacking && jumpCount < maxJumps){ 
+            super.jump(h);
+            System.out.println("Jump count = " + jumpCount);
+            currentAnimation = whichIdle(isFacingRight);
+            jumpCount++;
+        }
+    }
+
+    private void checkLanding(Rect[] walls) {
+        for (Rect wall : walls) {
+            if (this.overlaps(wall) && this.cameFromAbove(wall)) {
+                this.jumpCount = 0;
+                break;  
+            }
         }
     }
 
     public void attack(){
         isAttacking = true;
-        //currentAnimation = attackLT;
-        if(isFacingRight){
-            currentAnimation = attackRT;
-        }
-        else{
-            currentAnimation = attackLT;
-        }
+        currentAnimation = isFacingRight ? attackRT :  attackLT;
+            
     }
     public void stopAttack(){
         isAttacking = false;
@@ -93,13 +96,17 @@ public class mainCharacter extends Character {
         super.draw(pen);
     }
 
-    public void update(boolean upPressed, boolean downPressed, boolean leftPressed, boolean rightPressed) {
+    public void update(boolean upPressed, boolean downPressed, boolean leftPressed, boolean rightPressed, Rect[] walls){ 
         super.update();
         checkIdle(upPressed, downPressed, leftPressed, rightPressed);
+        stats();
+        checkLanding(walls);
     }
 
     
-
+    public void stats(){
+        // System.out.println("Player Health: " + health);
+    }
     
     
 }

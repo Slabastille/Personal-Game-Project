@@ -10,6 +10,22 @@ public class Enemies extends Character {
     public Enemies(int x, int y, int w, int h) {
         super(x, y, w, h);
     }
+    public void goLT(int dx){
+        if(!isAttacking){            
+            super.goLT(dx);
+        }
+
+    }
+    public void goRT(int dx){
+        if(!isAttacking){            
+            super.goRT(dx);
+        }
+    }
+    public void chase(Character main, int dx){
+        if(!isAttacking){
+            super.chase(main, dx);
+        }
+    }
 
     public void attack(){}
     
@@ -20,11 +36,13 @@ public class Enemies extends Character {
 
         if (distance <= detectionRange)
         {
+            System.out.println("Attack distance reached");
             isAttacking = true;
             attack();
         }
         else
         {
+            System.out.println("Attack distance not reached yet: " + distance);
             isAttacking = false;
             stopAttack();
         }
@@ -39,10 +57,10 @@ public class Enemies extends Character {
         this.isFacingRight = mainCharacter.x > this.x;
         //this.currentAnimation = isFacingRight ? idleRT : idleLT;
         if (isFacingRight){
-            System.out.println("Facing Right " + isFacingRight + " right");
+            // System.out.println("Facing Right " + isFacingRight + " right");
         }
         else{
-            System.out.println("Facing Left " + isFacingRight + " right");
+            // System.out.println("Facing Left " + isFacingRight + " right");
         }
     }
 
@@ -56,10 +74,20 @@ public class Enemies extends Character {
             super.update();
             setDirection(character);
             setIdle();
+            detectAndAttack(character);
     }
 
     public void draw(Graphics pen){
         super.draw(pen);
+    }
+
+    public Animation idleAnimation(boolean isFacingRight){
+        if(isFacingRight){
+            return idleRT;
+        }
+        else {
+            return idleLT;
+        }
     }
 
     

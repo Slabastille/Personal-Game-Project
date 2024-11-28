@@ -5,6 +5,7 @@ import engine.*;
 import engine.Character;
 import engine.Rect;
 import entities.*;
+import entities.Enemies;
 import entities.zombies.*;
 import entities.hooligans.*;
 import engine.*;
@@ -21,7 +22,10 @@ public class Game extends GamePanel
         };
 
 
-    mainCharacter Zack = new mainCharacter(300, 100, 100, 100);
+    mainCharacter Zack = new mainCharacter(200, 100, 100, 100);
+    hooliganShotgun Sam = new hooliganShotgun(350, 100, 100, 100, false);
+
+    Character[] AllCharacters = {Zack, Sam};
     
 
     @Override
@@ -35,6 +39,7 @@ public class Game extends GamePanel
         //g.setColor(Color.WHITE);
         
         Zack.draw(g);
+        Sam.draw(g);
          
 
         for(Rect wall : Walls){
@@ -56,39 +61,46 @@ public class Game extends GamePanel
         if (LT_PRESSED) {
             System.out.println("LT_PRESSED");
             Zack.goLT(5);
+            
         }
         if (RT_PRESSED) {
             System.out.println("RT_PRESSED");
             Zack.goRT(5);
         }
-        if (UP_PRESSED) {
-            System.out.println("UP_PRESSED");
-            Zack.goUP(5);
-        }
-        if (DN_PRESSED) {
-            System.out.println("DN_PRESSED");
-            Zack.goDN(5);
-        }
+        // if (UP_PRESSED) {
+        //     System.out.println("UP_PRESSED");
+        //     Zack.goUP(5);
+        // }
+        // if (DN_PRESSED) {
+        //     System.out.println("DN_PRESSED");
+        //     Zack.goDN(5);
+        // }
         if(ZZ_PRESSED){
             System.out.println("ZZ PRESSED");
             Zack.attack();
         }
         if(SB_PRESSED){
-            System.out.println("SB PRESSED");
-            Zack.jump(5);
+            // System.out.println("SB PRESSED");
+            Zack.jump(15);
+            SB_PRESSED = false;
         }
         
-        // Zack.sayHello();
+
         for (Rect wall : Walls) {
-            if(Zack.overlaps(wall)){
-                Zack.pushedOutOf(wall);
-                
+            for(Character character : AllCharacters){
+
+                if(character.overlaps(wall)){
+                    character.pushedOutOf(wall);
+                    
+                }
             }
         }
         
-        Zack.update(UP_PRESSED, DN_PRESSED, LT_PRESSED, RT_PRESSED);
-        // Zack.physicsOff();
+        Zack.update(UP_PRESSED, DN_PRESSED, LT_PRESSED, RT_PRESSED, Walls);
+        Sam.update(Zack);
         
+        // Zack.physicsOff();
+        // Sam.chase(Zack, 1);
 
 
     }
