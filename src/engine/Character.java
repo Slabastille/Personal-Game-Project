@@ -9,14 +9,17 @@ public class Character extends Rect{
     public Animation jump;
     public Animation idleLT;
     public Animation idleRT;
+    public Animation attackLT;
+    public Animation attackRT;
     public Animation currentAnimation;
     public boolean isFacingRight;
     public boolean isAttacking;
+    public int health;
     
 
     public Character(int x, int y, int w, int h) {
         super(x, y, w, h);
-        
+        health = 100;
 
     }
 
@@ -52,6 +55,7 @@ public class Character extends Rect{
     public void update(){
         this.move();
     }
+
     
 
     

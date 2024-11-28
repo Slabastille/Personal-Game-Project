@@ -1,19 +1,25 @@
 package entities.zombies;
 
 import engine.Character;
+import entities.Enemies;
 import engine.Animation;
 import engine.*;
 import java.awt.*;
 
-public class crazyZombie extends Character {
+public class crazyZombie extends Enemies {
     private String name = "zw";
     private String folderName = "crazyZombie/";
-    public crazyZombie(int x, int y, int w, int h) {
+    public crazyZombie(int x, int y, int w, int h, boolean isFacingRight) {
         super(x, y, w, h);
         this.moveLT = new Animation(name + "_wl", 10, folderName);
         this.moveRT = new Animation(name + "_wr", 10, folderName);
-        //this.idle = new Animation(name + "_il", 10);
-        currentAnimation = moveRT;
+        this.idleLT = new Animation(name + "_il", 5, folderName);
+        this.idleRT = new Animation(name + "_ir", 5, folderName);
+        this.attackLT = new Animation(name + "_al", 4, folderName);
+        this.attackRT = new Animation(name + "_ar", 4, folderName);
+        this.isFacingRight = isFacingRight;
+        this.currentAnimation = idleAnimation(isFacingRight);
+        this.detectionRange = 70;
     }
     public void goLT(int dx){
         super.goLT(dx);
@@ -23,15 +29,20 @@ public class crazyZombie extends Character {
         super.goRT(dx);
         currentAnimation = moveRT;
     }
-    public void goUP(int dy){
-        super.goUP(dy);
+     public void attack() {
+        super.attack();
+        currentAnimation = isFacingRight ? attackRT : attackLT;
     }
-    public void goDN(int dy){
-        super.goDN(dy);
-        //currentAnimation = idle;
+    public void stopAttack() {
+        super.stopAttack();
+        currentAnimation = isFacingRight ? idleRT : idleLT;
     }
     public void update() {
-        
+        super.update();
+    }
+
+    public void draw(Graphics pen){
+        super.draw(pen);
     }
 
     

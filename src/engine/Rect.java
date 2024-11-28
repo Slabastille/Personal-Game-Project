@@ -7,8 +7,8 @@ public class Rect
 	public int x;
 	public int y;
 	
-	int w;
-	int h;
+	public int w;
+	public int h;
 	
 	double vx = 0;
 	double vy = 0;
