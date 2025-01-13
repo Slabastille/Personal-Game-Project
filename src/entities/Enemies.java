@@ -36,13 +36,13 @@ public class Enemies extends Character {
 
         if (distance <= detectionRange)
         {
-            System.out.println("Attack distance reached");
+            // System.out.println("Attack distance reached");
             isAttacking = true;
             attack();
         }
         else
         {
-            System.out.println("Attack distance not reached yet: " + distance);
+            // System.out.println("Attack distance not reached yet: " + distance);
             isAttacking = false;
             stopAttack();
         }

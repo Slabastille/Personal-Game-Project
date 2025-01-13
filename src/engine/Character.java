@@ -40,6 +40,7 @@ public class Character extends Rect{
     //    super.draw(pen);
     // }
 
+    @Override
     public void draw(Graphics pen){
         int padding = -35; // Adjust this value to control the padding
         int imageX = x + padding ;

@@ -2,19 +2,25 @@ package engine;
 
 import java.awt.*;
 
-public class Animation {
 
-    private Image[] image;
-    private int next;
+public class Animation
+{
+	private Image[] image;
+	private int     next;
+	
+	private int duration;
+	private int delay;
 
-    //Image naming scheme
-    //character.action.index
-    public Animation(String name ,  int count, String folderName){
+	private boolean isComplete;
 
-        image = new Image[count];
-
-        for(int i = 0; i < count; i++){
-            //src/assets/images/mainCharacter/mc_ar_1.png
+    public String name;
+	
+	public Animation(String name, int count, String folderName, int duration)
+	{
+		this.image = new Image[count];
+        this.name = name;
+		
+		for(int i = 0; i < count; i++){
             try{
                 image[i] = Toolkit.getDefaultToolkit().getImage("src/assets/images/" + folderName + name + "_" + i + ".png");
                 if(image[i] == null){
@@ -24,17 +30,51 @@ public class Animation {
                 System.out.println("Error loading image: " + "src/assets/images/" + folderName + name + "_" + i + ".png");
             }
             }
-        next = -1;
-    }
-    
+		
+		this.duration = duration;
+		
+		this.delay = duration;
+		this.next = 0;
+		this.isComplete = false;
+	}
+	
+	
+	public Image nextImage()
+	{
+		// if(isComplete)
+		// {
+		// 	return image[image.length - 1];
+		// }
+		if(delay == 0)
+		{
+			next++;
+			
+			if(next == image.length) {
+				isComplete = true;
+				next =  1;
+			}
+			
+			delay = duration;
+		}
+		
+		delay--;
+		return image[next];
+	}
 
-    public Image nextImage(){
-        next++;
-        if(next >= image.length){
-            next = 0;
-        }
-        //System.out.println("Next Image");
-        //System.out.println(next);
-        return image[next];
-    }
+	public boolean isComplete()
+	{
+		return isComplete;
+	}
+
+	public void reset()
+	{
+		next = 0;
+		delay = duration;
+		isComplete = false;
+	}
+
+	public int getNext(){
+		return next;
+	}
+
 }
