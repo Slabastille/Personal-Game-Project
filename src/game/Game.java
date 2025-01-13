@@ -1,112 +1,129 @@
 package game;
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 
 import engine.*;
 import engine.Character;
-import engine.Rect;
 import entities.*;
-import entities.Enemies;
 import entities.zombies.*;
 import entities.hooligans.*;
 import engine.*;
 
 public class Game extends GamePanel
 {
-    Image Scene1 = Toolkit.getDefaultToolkit().getImage("src/assets/images/sceneOne/sceneOne.png");
-    // Image Scene1 = Toolkit.getDefaultToolkit().getImage("src/assets/images/mainCharacter/mc_ar_0.png");
-	Rect[] Walls = {
-            //new Rect (10, 10, 700, 100),  //top wall
-            new Rect (0, 0, 10, 600),   //left wall
-            //new Rect (700, 200, 1500, 30),//right wall
-            new Rect (10, 550, 800, 30),  //bottom wall
-        };
+    private Font customFont;
+    private Level currentLevel;
+    public mainCharacter Zack;
+    // public Rect Zack;
 
 
-    mainCharacter Zack = new mainCharacter(200, 100, 100, 100);
-    hooliganShotgun Sam = new hooliganShotgun(350, 100, 100, 100, false);
+    public Game() {
+        loadCustomFont();
+        setLevel("levelOne");
+        Zack = new mainCharacter(200, 100, 100, 100);
+        // Zack = new Rect (200, 100, 100, 100);
+        Zack.health = 100;
 
-    Character[] AllCharacters = {Zack, Sam};
+    }
+
+    public void setLevel(String levelName) {
+        if (levelName.equals("levelOne")) {
+            currentLevel = new levelOne();
+        } 
+         
+    }
+    
+    
     
 
-    @Override
+    @Override 
     protected void paintComponent(Graphics g) {
 
-
         super.paintComponent(g);
-
-
-        //g.drawImage(Scene1, 0, 0, null);
-        //g.setColor(Color.WHITE);
-        
-        Zack.draw(g);
-        Sam.draw(g);
-         
-
-        for(Rect wall : Walls){
-            wall.draw(g);
+        g.setColor(Color.WHITE);
+        currentLevel.draw(g);
+        if (Zack != null) {
+            Zack.draw(g);
         }
-
-        
+        drawHUD(g);
+        Camera.draw(g);
     }
 
     public void run(){
         super.run();
+
     }
 
     @Override
     public void updateGame() {
-        
+        // Zack.physicsOff();
 
-        
+
         if (LT_PRESSED) {
             System.out.println("LT_PRESSED");
-            Zack.goLT(5);
-            
+            Camera.moveLT(5);
+            Zack.goLT(2);
         }
         if (RT_PRESSED) {
             System.out.println("RT_PRESSED");
-            Zack.goRT(5);
+            Camera.moveRT(5);
+            Zack.goRT(2);
         }
-        // if (UP_PRESSED) {
-        //     System.out.println("UP_PRESSED");
-        //     Zack.goUP(5);
-        // }
-        // if (DN_PRESSED) {
-        //     System.out.println("DN_PRESSED");
-        //     Zack.goDN(5);
-        // }
-        if(ZZ_PRESSED){
-            System.out.println("ZZ PRESSED");
-            Zack.attack();
+        if (UP_PRESSED) {
+            System.out.println("UP_PRESSED");
+        }
+        if (DN_PRESSED) {
+            System.out.println("DN_PRESSED");
+            Zack.goDN(5);
         }
         if(SB_PRESSED){
-            // System.out.println("SB PRESSED");
-            Zack.jump(15);
+            System.out.println("SB PRESSED");
+            Zack.jump(10);
             SB_PRESSED = false;
         }
-        
-
-        for (Rect wall : Walls) {
-            for(Character character : AllCharacters){
-
-                if(character.overlaps(wall)){
-                    character.pushedOutOf(wall);
-                    
-                }
-            }
+        if(RR_PRESSED){
+            System.out.println("RR PRESSED");
+            Zack.rld();
+            // Zack.reload();
+            // RR_PRESSED = false;
         }
         
-        Zack.update(UP_PRESSED, DN_PRESSED, LT_PRESSED, RT_PRESSED, Walls);
-        Sam.update(Zack);
         
-        // Zack.physicsOff();
-        // Sam.chase(Zack, 1);
+        
 
+
+        // for (Rect wall : currentLevel.getWalls()) {
+        //     for(Character character : AllCharacters){
+        //         if(character.overlaps(wall)){
+        //             character.pushedOutOf(wall);
+        //         }
+        //     }
+        // }
+
+
+        for (Rect wall : currentLevel.getWalls()) {
+            if (Zack.overlaps(wall)) {
+                Zack.pushedOutOf(wall);
+            }
+        }
+
+        
+
+        currentLevel.wallCollision(Zack);
+        Zack.update(LT_PRESSED, RT_PRESSED);
+        Zack.checkLanding(currentLevel.getWalls());
+        
+
+        currentLevel.update();
+        // System.out.println("Zack Location  " + Zack.x + "  , " + Zack.y);
 
     }
 
+    @Override
     public void onAttackStart(){
         Zack.attack();
+
     }
 
     @Override
@@ -114,6 +131,29 @@ public class Game extends GamePanel
         Zack.stopAttack();
     }
     
+    private void loadCustomFont() {
+        try {
+            // Load the custom font from a file
+            customFont = Font.createFont(Font.TRUETYPE_FONT, new File("src/assets/fonts/bloodlustacadital.ttf")).deriveFont(40f);
+            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            ge.registerFont(customFont);
+        } catch (IOException | FontFormatException e) {
+            e.printStackTrace();
+            customFont = new Font("Arial", Font.PLAIN, 40); // Fallback font
+        }
+    }
 
+    public void drawHUD( Graphics g){
+        int healthBarWidth = (int) (200 * (Zack.health / 100.0));
+        g.setFont(customFont);
+        g.setColor(Color.RED);
+        g.drawString("SOLDIER X", 10, 30);
+        g.drawString("PROLOGUE", 620, 30);
+        g.drawString("SCAR :  " + Zack.magSize + " / " + Zack.ammo, 620, 65);
+        g.setColor(Color.GRAY);
+        g.fillRect(10, 40, 200, 25);
+        g.setColor(Color.RED);
+        g.fillRect(10, 40, healthBarWidth, 25);   
+    }
 	
 }

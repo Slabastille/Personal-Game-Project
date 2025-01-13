@@ -164,9 +164,9 @@ public class Rect
 	public void pushedOutOf(Rect r)
 	{
 		if(cameFromAbove(r)) 	pushbackUpFrom(r);
-		if(cameFromBelow(r))    pushbackDownFrom(r);
-		if(cameFromLeftOf(r))   pushbackLeftFrom(r);		
-		if(cameFromRightOf(r))	pushbackRightFrom(r);
+		else if(cameFromBelow(r))    pushbackDownFrom(r);
+		else if(cameFromLeftOf(r))   pushbackLeftFrom(r);		
+		else if(cameFromRightOf(r))	pushbackRightFrom(r);
 		
 		vx *= F;
 		
@@ -225,7 +225,11 @@ public class Rect
 	
 	public void draw(Graphics pen)
 	{
-		pen.drawRect(x, y, w, h);
+		// pen.drawRect(x , y  , w, h); 
+		pen.fillRect(x - Camera.x , y - Camera.y  , w, h);
+		pen.drawRect(x - Camera.x , y - Camera.y  , w, h);
+		// System.out.println("RECT DIMENSIONS: x " + (x - Camera.x) + " y: " + (y - Camera.y));
+
 	}
 	
 	

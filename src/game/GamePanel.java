@@ -3,18 +3,22 @@ import javax.swing.JPanel;
 import java.awt.*;
 import java.awt.event.*;
 
-public abstract class  GamePanel extends JPanel implements Runnable, KeyListener {
+public abstract class GamePanel extends JPanel implements Runnable, KeyListener, MouseListener {
 
-
+    int mx = -1;
+    int my = -1;
     boolean UP_PRESSED = false;
     boolean DN_PRESSED = false;
     boolean LT_PRESSED = false;
     boolean RT_PRESSED = false;
     boolean ZZ_PRESSED = false;
     boolean SB_PRESSED = false;
+    boolean RR_PRESSED = false;
 
     public GamePanel() {
         init();
+        this.LT_PRESSED = false;
+        this.RT_PRESSED = false;
     }
     @Override
     protected void paintComponent(Graphics g) {
@@ -25,7 +29,7 @@ public abstract class  GamePanel extends JPanel implements Runnable, KeyListener
         addKeyListener(this);
         setFocusable(true);
         requestFocusInWindow();
-
+        addMouseListener(this);
         Thread t = new Thread(this);
         t.start();
     }
@@ -49,7 +53,7 @@ public abstract class  GamePanel extends JPanel implements Runnable, KeyListener
             gameThread.start();
         }
 
-    public abstract void updateGame();
+
 
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == e.VK_UP) {
@@ -70,6 +74,9 @@ public abstract class  GamePanel extends JPanel implements Runnable, KeyListener
         }
         if(e.getKeyCode() == e.VK_SPACE){
             SB_PRESSED = true;
+        }
+        if(e.getKeyCode() == e.VK_R){
+            RR_PRESSED = true;
         }
         
     }
@@ -92,14 +99,35 @@ public abstract class  GamePanel extends JPanel implements Runnable, KeyListener
         }
         if(e.getKeyCode() == e.VK_SPACE){
             SB_PRESSED = false;
+        }
+        if(e.getKeyCode() == e.VK_R){
+            RR_PRESSED = false;
         }        
     }
-    public void keyTyped(KeyEvent e) {
-        // TODO Auto-generated method stub
-        
-    }
+    
 
+    public void mousePressed(MouseEvent e) {
+        mx = e.getX();
+        my = e.getY();
+        System.out.println("Mouse Pressed at " + mx + ", " + my);
+    }
+    
+
+    
+
+
+
+    public abstract void updateGame();
     public abstract void onAttackStart();
     public abstract void onAttackStop();
+
+    // Unused methods
+    public void keyTyped(KeyEvent e) {}
+    public void mouseDragged(MouseEvent e) {}
+    public void mouseMoved(MouseEvent e) {}
+    public void mouseReleased(MouseEvent e) {}
+    public void mouseClicked(MouseEvent e) {}
+    public void mouseEntered(MouseEvent e) {}
+    public void mouseExited(MouseEvent e) {}
 }
 
