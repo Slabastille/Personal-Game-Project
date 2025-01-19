@@ -45,6 +45,7 @@ public class mainCharacter extends Character {
         
         this.shotCooldown = 250;
         this.lastShotTime = 0;
+        this.physicsEnabled = true;
     }
      public void goLT(int dx){
         if(!isAttacking){
@@ -156,6 +157,7 @@ public class mainCharacter extends Character {
         // stats();
         // checkLanding(Walls);
         bulletsUpdate();
+        // System.out.println("Player Coordinates  X: " + this.x + " Y: " + this.y);
     }
 
     

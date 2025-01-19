@@ -22,7 +22,7 @@ public class Bullet {
     public void update() {
         x += vx;
 
-        if(x < -5 || x > 805){
+        if(x < -5 || x > 10000){
             isActive = false;
         }
     }

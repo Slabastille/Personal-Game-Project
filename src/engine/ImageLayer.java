@@ -26,7 +26,8 @@ public class ImageLayer {
 
     public void draw(Graphics pen) {
         for (int i = 0; i < images.size(); i++) {
-            pen.drawImage(images.get(i), x + i * 800 - Camera.x / z, y - Camera.y / z, 800, 525, null);
+            pen.drawImage(images.get(i), x + i * 800 / z, y / z, 800, 525, null);
+            // System.out.println("layer dimensions  X : " + x + " Y : " + y);
         }
     }
 }
