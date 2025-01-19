@@ -7,7 +7,7 @@ public class Main {
         JFrame window = new JFrame("The Last Soldier");
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setResizable(false);
-        window.setSize(800, 600); //set the dimensions of the window
+        window.setSize(800, 630); //set the dimensions of the window
         
         Game Game = new Game(); // Game handles rendering and updates
         window.add(Game);

@@ -16,6 +16,7 @@ public class Background {
     public void draw(Graphics pen) {
         for (ImageLayer layer : layers) {
             layer.draw(pen);
+            // System.out.println("layer dimensions  X : " + layer.x + " Y : " + layer.y);
         }
     }
 }

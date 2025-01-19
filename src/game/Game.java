@@ -14,24 +14,20 @@ public class Game extends GamePanel
 {
     private Font customFont;
     private Level currentLevel;
-    public mainCharacter Zack;
     // public Rect Zack;
 
 
     public Game() {
         loadCustomFont();
         setLevel("levelOne");
-        Zack = new mainCharacter(200, 100, 100, 100);
-        // Zack = new Rect (200, 100, 100, 100);
+        Zack = new mainCharacter(15  , 100, 100, 100);
         Zack.health = 100;
-
     }
 
     public void setLevel(String levelName) {
         if (levelName.equals("levelOne")) {
             currentLevel = new levelOne();
         } 
-         
     }
     
     
@@ -39,15 +35,21 @@ public class Game extends GamePanel
 
     @Override 
     protected void paintComponent(Graphics g) {
-
         super.paintComponent(g);
-        g.setColor(Color.WHITE);
-        currentLevel.draw(g);
+        
+        
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.translate(-Camera.x, -Camera.y);
+        currentLevel.draw(g2d);
+        
         if (Zack != null) {
-            Zack.draw(g);
+            Zack.draw(g2d);
         }
-        drawHUD(g);
-        Camera.draw(g);
+        
+        g2d.translate(Camera.x, Camera.y);
+        drawHUD(g2d);
+        
+        Camera.draw(g2d);
     }
 
     public void run(){
@@ -57,21 +59,26 @@ public class Game extends GamePanel
 
     @Override
     public void updateGame() {
-        // Zack.physicsOff();
 
+        currentLevel.wallCollision(Zack);
+
+        // Zack.physicsOff();
+        // Camera.update(Zack);
 
         if (LT_PRESSED) {
             System.out.println("LT_PRESSED");
-            Camera.moveLT(5);
-            Zack.goLT(2);
+            // Camera.moveLT(5);
+            Zack.goLT(5);
+            // Camera.moveLT(50);
         }
         if (RT_PRESSED) {
             System.out.println("RT_PRESSED");
-            Camera.moveRT(5);
-            Zack.goRT(2);
+            // Camera.moveRT(50);
+            Zack.goRT(5);
         }
         if (UP_PRESSED) {
             System.out.println("UP_PRESSED");
+            Zack.goUP(5);
         }
         if (DN_PRESSED) {
             System.out.println("DN_PRESSED");
@@ -85,38 +92,26 @@ public class Game extends GamePanel
         if(RR_PRESSED){
             System.out.println("RR PRESSED");
             Zack.rld();
-            // Zack.reload();
-            // RR_PRESSED = false;
         }
         
+        // Update camera position to follow the player
+    
         
         
 
 
-        // for (Rect wall : currentLevel.getWalls()) {
-        //     for(Character character : AllCharacters){
-        //         if(character.overlaps(wall)){
-        //             character.pushedOutOf(wall);
-        //         }
-        //     }
-        // }
+        Camera.shift(Zack, 800, 600, currentLevel);
+        
 
-
-        for (Rect wall : currentLevel.getWalls()) {
-            if (Zack.overlaps(wall)) {
-                Zack.pushedOutOf(wall);
-            }
-        }
 
         
 
-        currentLevel.wallCollision(Zack);
         Zack.update(LT_PRESSED, RT_PRESSED);
         Zack.checkLanding(currentLevel.getWalls());
-        
 
         currentLevel.update();
         // System.out.println("Zack Location  " + Zack.x + "  , " + Zack.y);
+        // System.out.println("Camera dimensions : " + Camera.x + " , " + Camera.y);
 
     }
 
@@ -156,4 +151,5 @@ public class Game extends GamePanel
         g.fillRect(10, 40, healthBarWidth, 25);   
     }
 	
+
 }

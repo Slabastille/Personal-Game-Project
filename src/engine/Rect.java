@@ -1,5 +1,6 @@
 package engine;
 
+import java.awt.Color;
 import java.awt.Graphics;
 
 public class Rect
@@ -9,9 +10,11 @@ public class Rect
 	
 	public int w;
 	public int h;
+
+	public boolean physicsEnabled;
 	
-	double vx = 0;
-	double vy = 0;
+	public double vx = 0;
+	public double vy = 0;
 	
 	double ay = G;
 	
@@ -35,6 +38,8 @@ public class Rect
 		
 		this.w = w;
 		this.h = h;
+
+		this.physicsEnabled = false;
 
 	}
 	
@@ -82,10 +87,13 @@ public class Rect
 	
 	public void move()
 	{
-		x += vx;
-		y += vy + G/2;
+		if(physicsEnabled){
+			x += vx;
+			y += vy + ay/2;
+			
+			vy += ay;
+		}
 		
-		vy += G;
 	}
 	
 	public void moveBy(int dx, int dy)
@@ -160,75 +168,118 @@ public class Rect
 			   (y + h >= r.y      ) &&			   
 			   (y     <= r.y + r.h);
 	}
-	
-	public void pushedOutOf(Rect r)
-	{
-		if(cameFromAbove(r)) 	pushbackUpFrom(r);
-		else if(cameFromBelow(r))    pushbackDownFrom(r);
-		else if(cameFromLeftOf(r))   pushbackLeftFrom(r);		
-		else if(cameFromRightOf(r))	pushbackRightFrom(r);
+
+	// public void bounceOff(Rect r)
+	// {
+	// 	if(cameFromLeftOf(r) || cameFromRightOf(r))  vx = -vx;
+	// 	if(cameFromAbove(r)  || cameFromBelow(r))    vy = -vy;
+	// }
+
+	// public void pushedOutOf(Rect r)
+	// {
+	// 	 if(cameFromLeftOf(r))   pushbackLeftFrom(r);		
+	// 	else if(cameFromRightOf(r))	pushbackRightFrom(r);
+	// 	else if(cameFromAbove(r)) 	pushbackUpFrom(r);
+	// 	else if(cameFromBelow(r))    pushbackDownFrom(r);
 		
-		vx *= F;
+	// 	vx *= F;
 		
-		if(Math.abs(vx) <= 1)  vx = 0;
-	}
+	// 	if(Math.abs(vx) <= 1)  vx = 0;
+	// }
 	
 	
-	public void bounceOff(Rect r)
-	{
-		if(cameFromAbove(r)  || cameFromBelow(r))    vy = -vy;
-		if(cameFromLeftOf(r) || cameFromRightOf(r))  vx = -vx;
-	}
 	
-	public boolean cameFromLeftOf(Rect r)
-	{
-		return x - vx + w < r.x;
-	}
 	
-	public boolean cameFromRightOf(Rect r)
-	{
-		return r.x + r.w < x - vx;
-	}
+	// public boolean cameFromLeftOf(Rect r)
+	// {
+	// 	return x - vx + w < r.x;
+	// }
+	
+	// public boolean cameFromRightOf(Rect r)
+	// {
+	// 	return r.x + r.w < x - vx;
+	// }
 	
 	public boolean cameFromAbove(Rect r)
 	{
 		return y - vy + h < r.y;
 	}
 	
-	public boolean cameFromBelow(Rect r)
-	{
-		return r.y + r.h < y - vy;
-	}
+	// public boolean cameFromBelow(Rect r)
+	// {
+	// 	return r.y + r.h < y - vy;
+	// }
 	
-	public void pushbackLeftFrom(Rect r)
-	{
-		x = r.x - w - 1;
-	}
+	// public void pushbackLeftFrom(Rect r)
+	// {
+	// 	x = r.x - w - 1 ;
+	// }
 	
-	public void pushbackRightFrom(Rect r)
-	{
-		x = r.x + r.w + 1;
-	}
+	// public void pushbackRightFrom(Rect r)
+	// {
+	// 	x = r.x + r.w + 1;
+	// }
 	
-	public void pushbackUpFrom(Rect r)
-	{
-		y = r.y - h - 1;
+	// public void pushbackUpFrom(Rect r)
+	// {
+	// 	y = r.y - h - 1;
 		
-		vy = 0;
-	}
+	// 	vy = 0;
+	// }
 	
-	public void pushbackDownFrom(Rect r)
-	{
-		y = r.y + r.h + 1;
-	}
+	// public void pushbackDownFrom(Rect r)
+	// {
+	// 	y = r.y + r.h + 1;
+	// }
+
+	public void pushedOutOf(Rect r) {
+    // 1) Calculate total overlap along X
+    double overlapX = Math.min(x + w, r.x + r.w) - Math.max(x, r.x);
+    // 2) Calculate total overlap along Y
+    double overlapY = Math.min(y + h, r.y + r.h) - Math.max(y, r.y);
+    
+    // If there is no overlap, do nothing
+    if (overlapX <= 0 || overlapY <= 0) return;
+    
+    // Decide which axis to push out on based on the smaller overlap
+    if (overlapX < overlapY) {
+        // Collided horizontally
+        if (x < r.x) {
+            // We are on the left side -> push left
+            x -= overlapX;
+        } else {
+            // We are on the right side -> push right
+            x += overlapX;
+        }
+        // Damp horizontal velocity
+        vx *= F;
+        if (Math.abs(vx) <= 1) vx = 0;
+    } else {
+        // Collided vertically
+        if (y < r.y) {
+            // We are above -> push up
+            y -= overlapY;
+            // Zero out vertical velocity if landing on top
+            vy = 0;
+        } else {
+            // We are below -> push down
+            y += overlapY;
+        }
+    }
+}
+
 	
 	
 	public void draw(Graphics pen)
 	{
-		// pen.drawRect(x , y  , w, h); 
-		pen.fillRect(x - Camera.x , y - Camera.y  , w, h);
-		pen.drawRect(x - Camera.x , y - Camera.y  , w, h);
-		// System.out.println("RECT DIMENSIONS: x " + (x - Camera.x) + " y: " + (y - Camera.y));
+		pen.setColor(Color.YELLOW);
+		pen.drawRect(x , y  , w, h); 
+		pen.fillRect(x , y  , w, h);
+		// pen.setColor(Color.MAGENTA);
+		// pen.drawRect(x - Camera.x , y - Camera.y  , w, h);
+		// pen.fillRect(x - Camera.x , y - Camera.y  , w, h);
+		// System.out.println("RECT DIMENSIONS: x " + (x) + " y: " + (y));
+
 
 	}
 	

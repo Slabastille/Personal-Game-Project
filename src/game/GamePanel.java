@@ -1,7 +1,11 @@
 package game;
 import javax.swing.JPanel;
+
+import entities.mainCharacter;
+
 import java.awt.*;
 import java.awt.event.*;
+import engine.Camera;
 
 public abstract class GamePanel extends JPanel implements Runnable, KeyListener, MouseListener {
 
@@ -14,6 +18,8 @@ public abstract class GamePanel extends JPanel implements Runnable, KeyListener,
     boolean ZZ_PRESSED = false;
     boolean SB_PRESSED = false;
     boolean RR_PRESSED = false;
+    public mainCharacter Zack;
+
 
     public GamePanel() {
         init();
@@ -89,9 +95,11 @@ public abstract class GamePanel extends JPanel implements Runnable, KeyListener,
         }
         if (e.getKeyCode() == e.VK_LEFT) {
             LT_PRESSED = false;
+            Zack.setVelocity(0, Zack.vy);
         }
         if (e.getKeyCode() == e.VK_RIGHT) {
             RT_PRESSED = false;
+            Zack.setVelocity(0, Zack.vy);
         }
         if(e.getKeyCode() == e.VK_Z) {
             ZZ_PRESSED = false;
@@ -109,7 +117,7 @@ public abstract class GamePanel extends JPanel implements Runnable, KeyListener,
     public void mousePressed(MouseEvent e) {
         mx = e.getX();
         my = e.getY();
-        System.out.println("Mouse Pressed at " + mx + ", " + my);
+        System.out.println("Mouse Pressed at " + (mx + Camera.x) + ", " + (my + Camera.y));
     }
     
 

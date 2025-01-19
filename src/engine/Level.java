@@ -20,6 +20,10 @@ public abstract class Level {
     public ArrayList<Character> entities;
     public Background backgrounds;
     private Clip backgroundClip;
+    public int WIDTH;
+    public int HEIGHT;
+    public Rect leftBarrier;
+    public Rect rightBarrier;
 
     public Level() {
         walls = new ArrayList<>();
@@ -41,33 +45,34 @@ public abstract class Level {
 
 
     public void draw(Graphics g) {
-        backgrounds.draw(g);
-        for (Rect wall : walls) {
-            g.setColor(Color.RED);
-            wall.draw(g);
-        }
-        for (Character entity : entities) {
-            entity.draw(g);
-        }
+        // for (Rect wall : walls) {
+        //     g.setColor(Color.RED);
+        //     wall.draw(g);
+        // }
+        // for (Character entity : entities) {
+        //     entity.draw(g);
+        // }
 
        
     }
+
+    
+
     public void wallCollision(Rect r) {
         for (Rect wall : getWalls()) {
             if (r.overlaps(wall)) {
                 r.pushedOutOf(wall);
             }
         }
+        if (r.overlaps(leftBarrier)) {
+                r.pushedOutOf(leftBarrier);
+            }
+        if (r.overlaps(rightBarrier)) {
+                r.pushedOutOf(rightBarrier);
+            }
     }
 
-    /*
-     * for (Rect wall : getWalls()) {
-                if(Zack.overlaps(wall)){
-                    Zack.pushedOutOf(wall);
-                }
-        }
-     * 
-     */
+ 
 
     public void update() {
         if(entities == null) {
