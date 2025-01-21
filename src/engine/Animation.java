@@ -77,4 +77,8 @@ public class Animation
 		return next;
 	}
 
+	public Image getLastImage() {
+        return image[image.length - 1];
+    }
+
 }

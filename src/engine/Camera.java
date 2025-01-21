@@ -25,7 +25,7 @@ public class Camera {
         
         
 
-        int margin = 100; // Margin from the screen edge before the camera moves
+        int margin = 250; // Margin from the screen edge before the camera moves
 
         if (main.x < x + margin) {
             x = main.x - margin;

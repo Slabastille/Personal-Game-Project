@@ -233,36 +233,24 @@ public class Rect
 	// }
 
 	public void pushedOutOf(Rect r) {
-    // 1) Calculate total overlap along X
     double overlapX = Math.min(x + w, r.x + r.w) - Math.max(x, r.x);
-    // 2) Calculate total overlap along Y
     double overlapY = Math.min(y + h, r.y + r.h) - Math.max(y, r.y);
     
-    // If there is no overlap, do nothing
     if (overlapX <= 0 || overlapY <= 0) return;
     
-    // Decide which axis to push out on based on the smaller overlap
     if (overlapX < overlapY) {
-        // Collided horizontally
         if (x < r.x) {
-            // We are on the left side -> push left
             x -= overlapX;
         } else {
-            // We are on the right side -> push right
             x += overlapX;
         }
-        // Damp horizontal velocity
         vx *= F;
         if (Math.abs(vx) <= 1) vx = 0;
     } else {
-        // Collided vertically
         if (y < r.y) {
-            // We are above -> push up
             y -= overlapY;
-            // Zero out vertical velocity if landing on top
             vy = 0;
         } else {
-            // We are below -> push down
             y += overlapY;
         }
     }

@@ -1,50 +1,150 @@
 package entities;
 import java.awt.*;
+
+import javax.sound.sampled.Clip;
+
 import engine.Character;
+import engine.Level;
 import engine.Animation;
+import engine.Rect;
 
 public class Enemies extends Character {
 
     public int detectionRange;
+    public int attackRange;
+    public int speed;
+    private int originalX;
+    private int originalY;
+    public int damage;
+    public boolean damageApplied;
+    
 
     public Enemies(int x, int y, int w, int h) {
         super(x, y, w, h);
+        this.physicsEnabled = true;
+        this.originalX = x;
+        this.originalY = y;
+        this.damageApplied = false;
+
     }
     public void goLT(int dx){
         if(!isAttacking){            
             super.goLT(dx);
+            isFacingRight = false;
+            currentAnimation = moveLT;
         }
 
     }
     public void goRT(int dx){
         if(!isAttacking){            
             super.goRT(dx);
-        }
-    }
-    public void chase(Character main, int dx){
-        if(!isAttacking){
-            super.chase(main, dx);
+            isFacingRight = true;
+            currentAnimation = moveRT;
         }
     }
 
-    public void attack(){}
+    public boolean isPlatformAhead(int direction, Level level) {
+        int checkX = (direction > 0) ? this.x + this.w : this.x - 1;
+        Rect platformBelow = new Rect(checkX, this.y + this.h + 1, 1, 1);
+
+        for (Rect platform : level.getPlatforms()) {
+            if (platform.overlaps(platformBelow)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void chase(Character main, int speed, Level level){
+        if(!isAttacking && Math.abs(main.y - this.y) <= 100){
+            if (main.x < this.x && isPlatformAhead(-1 , level)) {
+                goLT(speed);
+            } else if (main.x > this.x && isPlatformAhead(1 , level)) {
+                goRT(speed);
+            } else {
+                stopChasing();
+                returnToOriginalPosition(level);
+
+            }
+        }
+        else {
+            stopChasing();
+            returnToOriginalPosition(level);
+
+        }
+    }
+
+    public void stopChasing(){
+        this.vx = 0;
+        this.vy = 0;
+        this.currentAnimation = idleAnimation(isFacingRight);
+    }
+
+    public void attack(mainCharacter character){
+        isAttacking = true;
+        playSound(attackSound);
+        currentAnimation = isFacingRight ? attackRT : attackLT;
+    }
     
-    public void stopAttack(){}
+    public void stopAttack(mainCharacter character){
+        currentAnimation = isFacingRight ? idleRT : idleLT;
+        damageApplied = false;
+    }
 
-    public void detectAndAttack(Character mainCharacter){
-        double distance = Math.sqrt(Math.pow(mainCharacter.x - x, 2) + Math.pow(mainCharacter.y - y, 2));
+    public void detectAndAttack(mainCharacter character, Level level){
+        // double distance = Math.sqrt(Math.pow(character.x - x, 2) + Math.pow(character.y - y, 2));
 
-        if (distance <= detectionRange)
-        {
-            // System.out.println("Attack distance reached");
-            isAttacking = true;
-            attack();
+        
+        // if(distance <= attackRange)
+        // {
+        //     // System.out.println("Attack distance reached");
+        //     isAttacking = true;
+        //     attack(character);
+        // }
+        // else
+        // {
+        //     // System.out.println("Attack distance not reached yet: " + distance);
+        //     isAttacking = false;
+        //     stopAttack(character);
+        // }
+
+        if (character.isDead) {
+            // Stop any ongoing actions if the character is dead
+            if (isAttacking) {
+                stopAttack(character);
+            }
+            stopChasing();
+            currentAnimation = idleAnimation(isFacingRight);
+            return; // Exit early to prevent further detection or attacking
+        }
+        double distance = Math.sqrt(Math.pow(character.x - x, 2) + Math.pow(character.y - y, 2));
+
+        
+        if(distance <= attackRange){
+            if(!isAttacking){
+                // System.out.println("Attack distance reached");
+                isAttacking = true;
+                stopChasing();
+                attack(character);
+            }
+        }
+        else if (distance <= detectionRange){
+            setDirection(character);
+
+            if(isAttacking){
+                // System.out.println("Detection range reached");
+                isAttacking = false;
+                stopAttack(character);
+            }
+            chase(character, speed, level);
         }
         else
         {
-            // System.out.println("Attack distance not reached yet: " + distance);
-            isAttacking = false;
-            stopAttack();
+            if(isAttacking){
+                isAttacking = false;
+                stopAttack(character);
+            }
+            stopChasing();
         }
     }
     public void facingDirection(Character mainCharacter){
@@ -70,11 +170,38 @@ public class Enemies extends Character {
         }
     }
 
-    public void update(mainCharacter character){
+    public void update(mainCharacter character, Level level){
             super.update();
-            setDirection(character);
             setIdle();
-            detectAndAttack(character);
+            if (character.isDead) {
+            if (isAttacking) {
+                stopAttack(character);
+            }
+            stopChasing(); 
+            currentAnimation = idleAnimation(isFacingRight); 
+        return; 
+    }
+        if(!character.isDead){
+
+            detectAndAttack(character, level);
+            
+            if (currentAnimation == attackLT || currentAnimation == attackRT) {
+                if (!damageApplied && currentAnimation.getNext() == 1) {
+                    character.takeDamage(damage);
+                    damageApplied = true; 
+                    System.out.println("Main character took " + damage + " damage. Health: " + character.health);
+                }
+                if (currentAnimation.isComplete()) {
+                    damageApplied = false;
+                    currentAnimation.reset();
+                }
+            }
+        }
+        // System.out.println("Current Animation " + currentAnimation.name);
+
+        if(health <= 0 && !isDead){
+            this.die();
+        }
     }
 
     public void draw(Graphics pen){
@@ -89,6 +216,26 @@ public class Enemies extends Character {
             return idleLT;
         }
     }
+
+        public void returnToOriginalPosition(Level level) {
+        if (Math.abs(this.x - originalX) > speed) {
+            if (this.x > originalX && isPlatformAhead(-1, level)) {
+                goLT(speed);
+            } else if (this.x < originalX && isPlatformAhead(1, level)) {
+                goRT(speed);
+            } else {
+                stopChasing();
+            }
+        } else {
+            stopChasing();
+        }
+    }
+
+    public boolean shouldBeRemoved() {
+        return this.health <= 0; 
+    }
+
+    
 
     
 
