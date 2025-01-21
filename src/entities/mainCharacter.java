@@ -1,6 +1,9 @@
 package entities;
 import java.awt.*;
 import java.util.ArrayList;
+
+import javax.sound.sampled.Clip;
+
 import entities.Bullet;
 
 import engine.*;
@@ -16,7 +19,7 @@ public class mainCharacter extends Character {
     private int maxJumps = 2;
     private ArrayList<Bullet> bullets;
     public int magSize = 20;
-    public int ammo = 100;
+    public int ammo = 20;
     public long lastShotTime;
     public long shotCooldown;
     public Animation reloadLT;
@@ -24,6 +27,11 @@ public class mainCharacter extends Character {
     public boolean isShooting;
     public boolean isReloading;
     public boolean isMoving;
+    private SoundManager soundManager;
+    private boolean canAttack;
+    private Level currentLevel; 
+
+    
 
     public mainCharacter(int x, int y, int w, int h) {
         super(x, y, w, h);
@@ -35,6 +43,7 @@ public class mainCharacter extends Character {
         this.attackRT = new Animation(name + "_ar", 4, folderName, 7);
         this.reloadLT = new Animation(name + "_rdl", 13 , folderName, 7);
         this.reloadRT = new Animation(name + "_rdr", 13 , folderName, 7);
+        this.dying = new Animation(name + "_dd", 4 , folderName, 7);
         this.isFacingRight = true;
         this.isAttacking = false;
         this.currentAnimation = whichIdle(isFacingRight);
@@ -42,10 +51,16 @@ public class mainCharacter extends Character {
         this.isShooting = false;
         this.isReloading = false;
         this.isMoving = false;
-        
         this.shotCooldown = 250;
         this.lastShotTime = 0;
         this.physicsEnabled = true;
+        this.soundManager = new SoundManager();
+        this.soundManager.loadSound("bullet", "src/assets/sounds/mainCharacter/newBullet.wav");
+        this.soundManager.loadSound("reload", "src/assets/sounds/mainCharacter/mainCharacterReload.wav");
+        this.dieSound = loadSound("src/assets/sounds/mainCharacter/mainCharacterDead.wav");
+        this.hurtSound = loadSound("src/assets/sounds/mainCharacter/mainCharacterHurt.wav");
+        this.isDead = false;
+        this.canAttack = true;
     }
      public void goLT(int dx){
         if(!isAttacking){
@@ -71,8 +86,14 @@ public class mainCharacter extends Character {
         }
     }
 
+    public void setCurrentLevel(Level currentLevel) {
+        this.currentLevel = currentLevel;
+    }
+
     public void rld(){
+
         if(!isAttacking && magSize < 20 && ammo > 0){
+            soundManager.playSound("reload");
             isReloading = true;
             if(isFacingRight){
                 currentAnimation = reloadRT;
@@ -82,6 +103,8 @@ public class mainCharacter extends Character {
                 currentAnimation = reloadLT;
                 currentAnimation.reset();
             }
+            // soundManager.stopSound("reload");
+
             
         }
     }
@@ -89,18 +112,23 @@ public class mainCharacter extends Character {
     public void jump(int h){
         if(!isAttacking && jumpCount < maxJumps){ 
             super.jump(h);
-            // System.out.println("Jump count = " + jumpCount);
             currentAnimation = whichIdle(isFacingRight);
             jumpCount++;
         }
     }
 
     public void checkLanding(ArrayList <Rect> Walls) {
+        boolean landed = false;
         for (Rect wall : Walls) {
             if (this.overlaps(wall) && this.cameFromAbove(wall)) {
-                this.jumpCount = 0;
+                vy = 0;
+                landed = true;
                 break;  
             }
+        }
+        if(landed){
+            this.jumpCount = 0;
+            // System.out.println("Landed and reset jump count");
         }
     }
 
@@ -116,7 +144,7 @@ public class mainCharacter extends Character {
     }
     @Override
     public void draw(Graphics pen){
-        int padding = -35; // Adjust this value to control the padding
+        int padding = -35; 
         int imageX = x + padding ;
         int imageY = y + padding - 35;
         int imageW = w - 2 * padding;
@@ -124,15 +152,17 @@ public class mainCharacter extends Character {
 
         pen.drawRect(x , y , w, h);
        
-        if(currentAnimation.isComplete() && !isMoving && !isReloading && !isAttacking){
+        if (isDead && currentAnimation.isComplete()) {
+            pen.drawImage(currentAnimation.getLastImage(), imageX, imageY, imageW, imageH, null);
+        }
+        else if(currentAnimation.isComplete() && !isMoving && !isReloading && !isAttacking){
             currentAnimation = whichIdle(isFacingRight);
         }
-        // else{
-        //     pen.drawImage(currentAnimation.nextImage(), imageX , imageY, imageW , imageH, null);
-        // }
+        else{
             pen.drawImage(currentAnimation.nextImage(), imageX , imageY, imageW , imageH, null);
-
+        }
         
+
         for (Bullet bullet : bullets) {
                 bullet.draw(pen);
         }
@@ -140,36 +170,51 @@ public class mainCharacter extends Character {
 
 
 
-    //public void update(boolean leftPressed, boolean rightPressed, Rect[] Walls){
     public void update(boolean leftPressed, boolean rightPressed){ 
         super.update();
-        if(!isReloading){
+        // System.out.println("Health " +  this.health);
+
+        if(isDead){
+            if (currentAnimation.isComplete()) {
+                currentAnimation.getLastImage();
+            }
+            return;
+        }
+
+        if(!isReloading && !isDead){
             checkIdle(leftPressed, rightPressed);
         }
-        if(currentAnimation.isComplete() && isReloading){
+        if(currentAnimation.isComplete() && isReloading && !isDead){
             reload();
             isReloading = false;
+            soundManager.stopSound("reload");
             currentAnimation = whichIdle(isFacingRight);
         }
-        // if(currentAnimation.name.contains("al") || currentAnimation.name.contains("ar") && isAttacking && currentAnimation.getNext() == 2){
-        //     shoot();
-        // }
-        // stats();
-        // checkLanding(Walls);
+
+        if(currentAnimation.isComplete() && !isDead){
+            currentAnimation.reset();
+        }
+        if(health <= 0 && !isDead){
+            this.die();
+        }
         bulletsUpdate();
-        // System.out.println("Player Coordinates  X: " + this.x + " Y: " + this.y);
     }
 
     
    
 
     public void attack(){
-        currentAnimation = isFacingRight ? attackRT :  attackLT;
-        if(magSize > 0){
+        if(canAttack && magSize > 0){
+            soundManager.playSound("bullet");
+            currentAnimation = isFacingRight ? attackRT :  attackLT;
             isAttacking = true;
-            // currentAnimation.reset();
-            shoot();    
-            // stopAttack();
+            shoot();
+            canAttack = false;
+            soundManager.stopSound("bullet");
+
+        }
+        else{
+            currentAnimation = whichIdle(isFacingRight);
         }
     }
 
@@ -177,12 +222,12 @@ public class mainCharacter extends Character {
         isAttacking = false;
         stopShooting();
         currentAnimation = whichIdle(isFacingRight);
+        canAttack = true;
     }
 
     public void shoot() {
         long currentTime = System.currentTimeMillis();
         if(magSize > 0 && !isShooting && (currentTime - lastShotTime >= shotCooldown)){
-        // if(magSize > 0 && isAttacking){
             int butlletVelocity = isFacingRight ? 10 : -10;
             int bulletX = isFacingRight ? x + w : x;
             bullets.add(new Bullet(bulletX, y + h / 3, butlletVelocity));
@@ -193,27 +238,70 @@ public class mainCharacter extends Character {
 
     public void stopShooting(){
         isAttacking = false;
-        // isShooting = false;
+        isShooting = false;
     }
 
     private void bulletsUpdate(){
+        // for (int i = 0; i < bullets.size(); i++) {
+        //     Bullet bullet = bullets.get(i);
+        //     bullet.update();
+        //     if (!bullet.isActive()) {
+        //         bullets.remove(i);
+        //         i--;
+        //     }
+        // }
         for (int i = 0; i < bullets.size(); i++) {
             Bullet bullet = bullets.get(i);
             bullet.update();
             if (!bullet.isActive()) {
                 bullets.remove(i);
                 i--;
+            } else {
+                // Check for collision with enemies
+                for (Enemies enemy : currentLevel.getEntities()) {
+                    if (bullet.overlaps(enemy) && Math.abs(enemy.x - this.x) <= 700) {
+                        enemy.takeDamage(20); // Assume each bullet does 10 damage
+                        bullet.deactivate();
+                        break;
+                    }
+                }
+                // Check for collision with regular Rects
+                for (Rect platform : currentLevel.getPlatforms()) {
+                    if (bullet.overlaps(platform)) {
+                        bullet.deactivate();
+                        break;
+                    }
+                }
             }
         }
     }
     public void reload(){
-            magSize = 20;
-            ammo -= 20;
+            int addedAmmo = 20 - magSize;
+            magSize += addedAmmo;
+            ammo -= addedAmmo;
+
     }
     public void stats(){
         System.out.println("Player Health: " + health);
     }
+    public void takeDamage(int damage){
+        health -= damage;
+        playSound(this.hurtSound);
+
+    }
+
+    public void die() {
+        if(!isDead){
+            currentAnimation = dying;
+            if(currentAnimation.isComplete()){
+                isDead = true;
+            }
+            playSound(dieSound);
+        }
+    }
+
     //Next work on bullets hitting and damaging enemies and reload deature to swap btwn mag and full amount
+    
     
     
 }
