@@ -132,9 +132,9 @@ public abstract class Level {
         if(entities == null) {
             return;
         }
-        // for (Enemies entity : entities) {
-        //     entity.update(character, this);
-        // }
+        for (Enemies entity : entities) {
+            entity.update(character, this);
+        }
         applyPowerups(character);
     }
 

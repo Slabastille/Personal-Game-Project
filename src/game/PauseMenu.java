@@ -57,7 +57,8 @@ public class PauseMenu extends JPanel {
                 String helpMessage = "            WELCOME TO HELL SOLDIER \n"
                                    + "-----------------------------------\n"
 
-                                   + "Press 'LEFT'     to move.\n"
+                                   + "Press 'LEFT'     to move left.\n"
+                                   + "Press 'RIGHT'    to move right.\n"
                                    + "Press 'Z'        to attack.\n"
                                    + "Press 'R'        to reload.\n"
                                    + "Press 'P'        to pause.\n"

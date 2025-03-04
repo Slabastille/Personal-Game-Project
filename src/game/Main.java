@@ -38,12 +38,12 @@ public class Main {
         cardLayout.show(mainPanel, "GameScreen");
         game.requestFocusInWindow();
         game.startGameLoop();
-        game.currentLevel.playBackgroundMusic("src/assets/sounds/Rob Dougan - Clubbed to Death (Kurayamino Variation) [ ezmp3.cc ].wav");
+        // game.currentLevel.playBackgroundMusic("src/assets/sounds/Rob Dougan - Clubbed to Death (Kurayamino Variation) [ ezmp3.cc ].wav");
     }
 
     public static void showTitleScreen() {
         cardLayout.show(mainPanel, "TitleScreen");
-        titleScreen.playBackgroundMusic(); 
+        // titleScreen.playBackgroundMusic(); 
     }
 
     
