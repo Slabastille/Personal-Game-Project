@@ -1,6 +1,6 @@
 # The Last Soldier
 
-Welcome to **The Last Soldier**, a simple Java applet game that utilizes Java to render the game. This README will guide you through the setup and provide an overview of the game.
+Welcome to **The Last Soldier**, a scroller shooter zombie game that utilizes Java to render the game. This README will guide you through the setup and provide an overview of the game.
 
 ## Table of Contents
 
